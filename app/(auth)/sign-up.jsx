@@ -1,22 +1,39 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { images } from "../../constants";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import { createUser } from "../../lib/appwrite";
+import { useGlobalContext } from "../../context/GlobalProvider";
 
 const SignUp = () => {
   const [form, setForm] = useState({
-    usename:"",
+    username: "",
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {setUser, setIsLoggedIn} = useGlobalContext();
 
-  const submit = () => {
-    
+  const submit = async () => {
+    if (!form.username || !form.email || !form.password) {
+      Alert.alert("Error", "Please fill in all fields");
+    }
+    setIsSubmitting(true);
+    try {
+      const result = await createUser(form.email, form.password, form.username);
+      //set it to global state
+      setUser(result);
+      setIsLoggedIn(true);
+      router.replace("/home ");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -32,8 +49,8 @@ const SignUp = () => {
           </Text>
           <FormField
             title="Username"
-            value={form.usename}
-            handleChangeText={(e) => setForm({ ...form, usename: e })}
+            value={form.username}
+            handleChangeText={(e) => setForm({ ...form, username: e })}
             otherStyles="mt-10"
           />
           <FormField
@@ -51,7 +68,7 @@ const SignUp = () => {
             keyboardType="password"
           />
           <CustomButton
-            text="Sign in"
+            text="Sign Up"
             handlePress={submit}
             containerStyle={"mt-7 w-full"}
             isLoading={isSubmitting}
@@ -59,7 +76,7 @@ const SignUp = () => {
 
           <View className="flex-row justify-center pt-5 gap-2">
             <Text className="text-gray-100 font-pregular text-sm text-center">
-            Already have an account?
+              Already have an account?
             </Text>
             <Link
               href={"/sign-in"}
