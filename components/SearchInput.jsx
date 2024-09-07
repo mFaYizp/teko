@@ -22,7 +22,6 @@ const SearchInput = ({
         placeholder="Search for a video topic"
         placeholderTextColor={"#7b7b8b"}
         onChangeText={handleChangeText}
-        secureTextEntry={title === "Password" && !showPassword}
       />
 
 
